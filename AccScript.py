@@ -5,9 +5,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
 import subprocess
 import time
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import requests
 
 apt_dict = {"Vista A": 0,
             "Vista A1": 1,
@@ -29,15 +26,6 @@ for elem in apt_array:
         index_of_wifi_list = apt_array.index(elem)
         break
     index_of_wifi_list =+ 1
-#access wifi spreadsheet
-#scope = ['https://spreadsheets.google.com/feeds/','https://www.googleapis.com/auth/drive']
-#credential = ServiceAccountCredentials.from_json_keyfile_name('projectowner.json', scope)
-#client = gspread.authorize(credential)
-#access the needed worksheet
-#xls = client.open('Copy of Latest A.P.U Accommodation Wi-Fi List ').get_worksheet(index_of_wifi_list)
-#print(xls)
-#get house wifi information row
-#print(xls.get_all_values(xls.find(wifi_init)))
 
 routerMac=subprocess.check_output(["arp","-a", "192.168.0.1"]).decode('utf-8').split()[-2].split('-') #get MAC of router
 routerMac = ''.join(routerMac).upper()
@@ -51,6 +39,7 @@ driver = webdriver.Chrome()
 wait = WebDriverWait(driver, 10)
 driver.get(url)
 driver.implicitly_wait(10)
+
 #enter input
 driver.find_element_by_id("login-username").send_keys(username)
 driver.find_element_by_xpath("//input[@type='password']").send_keys(password)
@@ -115,15 +104,3 @@ if (driver.find_element_by_xpath("//input[@type='password']").get_attribute("val
     driver.find_element_by_xpath("//input[@type='password']").send_keys(wifinewpass)
 #driver.find_element(By.XPATH, "//div[@class='form-submit button-container submit']//button[@type='button']").click()#click submit button
 
-
-
-#update excel/gdrive accordingly
-#while True:
-#    try:
-#        file = urllib.request.urlopen('http://google.com');
-#        print('Connect');
-#        break;
-#    except urllib.error.URLError:
-#        print('No connect');
-#        time.sleep(3);
-#+2*(Keys.TAB+"APU@"+routerMac[-4:])
