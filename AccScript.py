@@ -5,6 +5,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
 import subprocess
 import time
+import requests
+import json
 
 apt_dict = {"Vista A": 0,
             "Vista A1": 1,
@@ -104,3 +106,61 @@ if (driver.find_element_by_xpath("//input[@type='password']").get_attribute("val
     driver.find_element_by_xpath("//input[@type='password']").send_keys(wifinewpass)
 #driver.find_element(By.XPATH, "//div[@class='form-submit button-container submit']//button[@type='button']").click()#click submit button
 
+# TODO 
+# 1. replace all hardcoded variable 
+# - unitName
+# - SSID
+# - routerModel
+# - routerSN
+# - routerMac
+# 2. Maybe different router different selenium solution ?
+# 3. Try save the token in a file maybe ? so it wont ask for token everytime 
+# --- It's for future enchancement, for now its still okey 
+
+
+unitInfo = {
+        "token": getToken(),
+        "unitNumber": "A1-10-06",
+        "ssid": "VS-A1-10-06",
+        "wifiPass": wifinewpass,
+        "PPPoeUserName": pppoe_username,
+        "PPPoePassword": pppoe_password,
+        "routerModel": "TP-LINK AC1200",
+        "routerSN": "ASDSADSADSAD",
+        "routerMac": "ADSDSADASD",
+        "routerPass": password
+    }
+
+
+def getToken():
+    loginUrl = "https://us-central1-chengkangzai.cloudfunctions.net/login"
+    loginInfo = {
+        "email": "email@email.com",
+        "password": "password",
+        "unit": unitName
+    }
+    payload = json.dumps(loginInfo)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.request(
+        "POST", loginUrl, headers=headers, data=payload)
+    jsonString = json.loads(response.text)
+    token = jsonString['token']
+    return(token)
+
+
+
+
+def sendInformation():
+    
+    updateUrl = "https://us-central1-chengkangzai.cloudfunctions.net/updateUnit"
+    headers = {'Content-Type': 'application/json'}
+    payload = json.dumps(unitInfo)
+    response = requests.request(
+        "POST", updateUrl, headers=headers, data=payload)
+    jsonString = json.loads(response.text)
+    if jsonString['stauts'] == 400:
+    print(jsonString['message'])
+    else:
+        print("Something wrong" + jsonString['message'])
+
+sendInformation()
